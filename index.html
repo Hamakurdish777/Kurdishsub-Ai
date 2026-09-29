@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KurdSub AI</title>
-
   <style>
     body {
       margin: 0;
@@ -12,35 +11,31 @@
       background: #0f172a;
       color: white;
       text-align: center;
-      padding: 40px 20px;
+      padding: 30px 15px;
     }
-
     h1 {
-      font-size: 40px;
+      font-size: 38px;
+      margin-bottom: 10px;
     }
-
     p {
       color: #94a3b8;
     }
-
     .box {
-      max-width: 550px;
-      margin: 40px auto;
+      max-width: 700px;
+      margin: 35px auto;
       background: #1e293b;
       padding: 25px;
       border-radius: 20px;
     }
-
     input {
       width: 100%;
-      padding: 15px;
       box-sizing: border-box;
-      border-radius: 10px;
+      padding: 15px;
       border: none;
+      border-radius: 10px;
       font-size: 16px;
       margin-bottom: 15px;
     }
-
     button {
       width: 100%;
       padding: 15px;
@@ -52,71 +47,87 @@
       font-weight: bold;
       cursor: pointer;
     }
-
-    #result {
+    button:disabled {
+      background: #64748b;
+      cursor: not-allowed;
+    }
+    #status {
       margin-top: 20px;
       color: #22c55e;
+      font-weight: bold;
+    }
+    #videoTitle {
+      margin-top: 25px;
+      font-size: 20px;
+    }
+    #transcript {
+      margin-top: 20px;
+      background: #0f172a;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: left;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      max-height: 500px;
+      overflow-y: auto;
     }
   </style>
 </head>
-
 <body>
-
   <h1>🎬 KurdSub AI</h1>
-
   <p>ژێرنووسی ڤیدیۆکان بکە بە کوردی سۆرانی</p>
-
   <div class="box">
-
     <input
       id="youtubeUrl"
       type="text"
       placeholder="لینکی YouTube لێرە دابنێ..."
     >
-
-    <button onclick="translateVideo()">
-      وەرگێڕان بۆ کوردی
+    <button id="translateButton" onclick="getTranscript()">
+      وەرگرتنی ژێرنووس
     </button>
-
-    <div id="result"></div>
-
+    <div id="status"></div>
+    <div id="videoTitle"></div>
+    <div id="transcript"></div>
   </div>
-
   <script>
-    async function translateVideo() {
+    async function getTranscript() {
       const input = document.getElementById("youtubeUrl");
-      const result = document.getElementById("result");
-
+      const button = document.getElementById("translateButton");
+      const status = document.getElementById("status");
+      const title = document.getElementById("videoTitle");
+      const transcriptBox = document.getElementById("transcript");
       const videoUrl = input.value.trim();
-
       if (!videoUrl) {
-        result.textContent = "تکایە لینکی YouTube دابنێ.";
+        status.textContent = "❌ تکایە لینکی YouTube دابنێ.";
         return;
       }
-
-      result.textContent = "⏳ لینکەکە پشکنین دەکرێت...";
-
+      button.disabled = true;
+      status.textContent = "⏳ ژێرنووسەکە وەردەگیرێت...";
+      title.textContent = "";
+      transcriptBox.textContent = "";
       try {
         const response = await fetch(
           "https://kurdishsub-ai.mahammadsaadi789.workers.dev/api?url=" +
           encodeURIComponent(videoUrl)
         );
-
         const data = await response.json();
-
-        if (data.success) {
-          result.textContent =
-            "✅ لینکەکە وەرگیرا — Video ID: " + data.videoId;
-        } else {
-          result.textContent = "❌ " + data.error;
+        if (!data.success) {
+          status.textContent = "❌ " + (data.error || "کێشەیەک ڕوویدا");
+          return;
         }
-
+        status.textContent = "✅ ژێرنووس بە سەرکەوتوویی وەرگیرا";
+        title.textContent = "🎬 " + data.title;
+        const text = data.transcript
+          .map(item => item.text)
+          .join("\n");
+        transcriptBox.textContent = text;
       } catch (error) {
-        result.textContent =
-          "❌ کێشەیەک ڕوویدا. دووبارە هەوڵ بدەرەوە.";
+        status.textContent =
+          "❌ نەتوانرا پەیوەندی بە سێرڤەرەکەوە بکرێت.";
+      } finally {
+        button.disabled = false;
       }
     }
   </script>
-
 </body>
 </html>
