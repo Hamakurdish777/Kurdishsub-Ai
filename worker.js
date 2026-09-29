@@ -2,6 +2,7 @@ export default {
   async fetch(request) {
     const url = new URL(request.url);
 
+    // API endpoint
     if (url.pathname === "/api") {
       const videoUrl = url.searchParams.get("url");
 
@@ -27,7 +28,7 @@ export default {
         return new Response(
           JSON.stringify({
             success: false,
-            error: "ئەمە لینکێکی دروستی YouTube نییە"
+            error: "ئەمە لینکی دروستی YouTube نییە"
           }),
           {
             headers: {
@@ -51,6 +52,13 @@ export default {
       );
     }
 
-    return new Response("KurdSub AI Backend is running 🚀");
+    return new Response(
+      "KurdSub AI Backend is running 🚀",
+      {
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8"
+        }
+      }
+    );
   }
 };
