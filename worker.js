@@ -104,10 +104,12 @@ target: "ckb"
         translation: translationData.translation
       });
 
- } catch (error) {
-  return jsonResponse({
-    success: false,
-    error: "کێشەیەک ڕوویدا",
-    details: String(error)
-  }, 500);
-}
+     } catch (error) {
+      return jsonResponse({
+        success: false,
+        error: "کێشەیەک ڕوویدا",
+        details: String(error)
+      }, 500);
+    }
+  }
+};
