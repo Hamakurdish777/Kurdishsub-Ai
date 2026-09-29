@@ -104,12 +104,10 @@ export default {
         translation: translationData.translation
       });
 
-    } catch (error) {
-      details: String(error)return jsonResponse({
-        success: false,
-        error: "کێشەیەک ڕوویدا",
-        details: String(error)
-      }, 500);
-    }
-  }
-};
+ } catch (error) {
+  return jsonResponse({
+    success: false,
+    error: "کێشەیەک ڕوویدا",
+    details: String(error)
+  }, 500);
+}
