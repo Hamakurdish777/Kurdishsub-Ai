@@ -1,0 +1,9 @@
+{
+  "name": "kurdishsub-ai",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "youtube-transcript-api": "^1.0.0"
+  }
+}
