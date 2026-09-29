@@ -49,19 +49,14 @@ export default {
 
       const info = await youtube.getInfo(videoId);
 
-      const transcript = await info.getTranscript();
-
-      const text = transcript.transcript.content
-        .body
-        .initial_segments
-        .map(segment => segment.snippet.text)
-        .join(" ");
+      const transcriptData = await info.getTranscript();
 
       return new Response(
         JSON.stringify({
           success: true,
           videoId: videoId,
-          transcript: text
+          message: "Transcript بە سەرکەوتوویی وەرگیرا ✅",
+          data: transcriptData
         }),
         {
           headers: {
@@ -74,8 +69,8 @@ export default {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "نەتوانرا Subtitle ـی ئەم ڤیدیۆیە وەربگیرێت",
-          details: error.message
+          error: "نەتوانرا Subtitle وەربگیرێت",
+          details: String(error)
         }),
         {
           headers: {
