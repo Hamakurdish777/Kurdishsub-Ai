@@ -3,43 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>KurdSub AI</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #0f172a;
       color: white;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 600px;
       text-align: center;
+      padding: 40px 20px;
     }
 
     h1 {
-      font-size: 42px;
-      margin-bottom: 10px;
+      font-size: 40px;
     }
 
-    .subtitle {
+    p {
       color: #94a3b8;
-      margin-bottom: 35px;
     }
 
     .box {
+      max-width: 550px;
+      margin: 40px auto;
       background: #1e293b;
       padding: 25px;
       border-radius: 20px;
@@ -47,79 +33,45 @@
 
     input {
       width: 100%;
-      padding: 16px;
+      padding: 15px;
+      box-sizing: border-box;
+      border-radius: 10px;
       border: none;
-      border-radius: 12px;
       font-size: 16px;
       margin-bottom: 15px;
     }
 
     button {
       width: 100%;
-      padding: 16px;
+      padding: 15px;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       background: #22c55e;
       color: white;
       font-size: 17px;
       font-weight: bold;
-    }
-
-    button:active {
-      transform: scale(0.98);
-    }
-
-    .status {
-      margin-top: 20px;
-      color: #94a3b8;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="container">
+  <h1>🎬 KurdSub AI</h1>
 
-    <h1>🎬 KurdSub AI</h1>
+  <p>ژێرنووسی ڤیدیۆکان بکە بە کوردی سۆرانی</p>
 
-    <p class="subtitle">
-      ژێرنووسی ڤیدیۆکان بکە بە کوردی سۆرانی
-    </p>
+  <div class="box">
 
-    <div class="box">
+    <input
+      type="text"
+      placeholder="لینکی YouTube لێرە دابنێ..."
+    >
 
-      <input
-        type="text"
-        id="youtubeUrl"
-        placeholder="لینکی YouTube لێرە دابنێ..."
-      >
-
-      <button onclick="translateVideo()">
-        وەرگێڕان بۆ کوردی
-      </button>
-
-      <div class="status" id="status">
-        ئامادەیە 🚀
-      </div>
-
-    </div>
+    <button>
+      وەرگێڕان بۆ کوردی
+    </button>
 
   </div>
-
-  <script>
-    function translateVideo() {
-
-      const url = document.getElementById("youtubeUrl").value;
-      const status = document.getElementById("status");
-
-      if (!url) {
-        status.innerText = "تکایە لینکی YouTube دابنێ.";
-        return;
-      }
-
-      status.innerText = "بەم زووانە سیستەمی ژێرنووس دەست پێدەکات... 🚀";
-    }
-  </script>
 
 </body>
 </html>
