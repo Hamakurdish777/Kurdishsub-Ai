@@ -2,7 +2,6 @@ export default {
   async fetch(request) {
     const url = new URL(request.url);
 
-    // API endpoint
     if (url.pathname === "/api") {
       const videoUrl = url.searchParams.get("url");
 
@@ -28,7 +27,7 @@ export default {
         return new Response(
           JSON.stringify({
             success: false,
-            error: "ئەمە لینکی دروستی YouTube نییە"
+            error: "لینکی YouTube دروست نییە"
           }),
           {
             headers: {
@@ -38,27 +37,57 @@ export default {
         );
       }
 
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: "لینکی YouTube وەرگیرا ✅",
-          videoId: match[1]
-        }),
-        {
-          headers: {
-            "Content-Type": "application/json; charset=utf-8"
-          }
+      const videoId = match[1];
+
+      try {
+        const transcriptResponse = await fetch(
+          `https://youtube-transcript.ai/transcript/${videoId}.txt?lang=en`
+        );
+
+        if (!transcriptResponse.ok) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: "Subtitle بۆ ئەم ڤیدیۆیە بەردەست نییە"
+            }),
+            {
+              headers: {
+                "Content-Type": "application/json; charset=utf-8"
+              }
+            }
+          );
         }
-      );
+
+        const transcript = await transcriptResponse.text();
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            videoId: videoId,
+            transcript: transcript
+          }),
+          {
+            headers: {
+              "Content-Type": "application/json; charset=utf-8"
+            }
+          }
+        );
+
+      } catch (error) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "کێشەیەک لە وەرگرتنی Subtitle ڕوویدا"
+          }),
+          {
+            headers: {
+              "Content-Type": "application/json; charset=utf-8"
+            }
+          }
+        );
+      }
     }
 
-    return new Response(
-      "KurdSub AI Backend is running 🚀",
-      {
-        headers: {
-          "Content-Type": "text/plain; charset=utf-8"
-        }
-      }
-    );
+    return new Response("KurdSub AI Backend is running 🚀");
   }
 };
