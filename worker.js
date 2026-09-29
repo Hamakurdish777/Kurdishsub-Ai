@@ -81,8 +81,8 @@ export default {
           },
           body: JSON.stringify({
             text: text,
-            source: "eng_latn",
-            target: "ckb_Arab"
+            source: "en",
+target: "ckb"
           })
         }
       );
