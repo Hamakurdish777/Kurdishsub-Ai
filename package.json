@@ -4,6 +4,6 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "youtube-transcript-api": "^1.0.0"
+    "youtubei.js": "^18.1.0"
   }
 }
