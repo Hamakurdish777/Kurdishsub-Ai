@@ -1,5 +1,3 @@
-import { Innertube } from "youtubei.js/cf-worker";
-
 export default {
   async fetch(request) {
     const url = new URL(request.url);
@@ -14,7 +12,7 @@ export default {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "YouTube URL پێویستە"
+          error: "تکایە لینکی YouTube دابنێ"
         }),
         {
           headers: {
@@ -23,39 +21,37 @@ export default {
         }
       );
     }
-
-    const match = videoUrl.match(
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([^&?/]+)/
-    );
-
-    if (!match) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: "لینکی YouTube دروست نییە"
-        }),
-        {
-          headers: {
-            "Content-Type": "application/json; charset=utf-8"
-          }
-        }
-      );
-    }
-
-    const videoId = match[1];
 
     try {
-      const youtube = await Innertube.create();
+      const response = await fetch(
+        "https://api.freetranscriptapi.com/v1/transcript?video_url=" +
+        encodeURIComponent(videoUrl)
+      );
 
-      const info = await youtube.getInfo(videoId);
-      const transcript = await info.getTranscript();
+      const data = await response.json();
+
+      if (!response.ok) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "نەتوانرا Transcript وەربگیرێت",
+            details: data
+          }),
+          {
+            status: response.status,
+            headers: {
+              "Content-Type": "application/json; charset=utf-8"
+            }
+          }
+        );
+      }
 
       return new Response(
         JSON.stringify({
           success: true,
-          videoId,
-          message: "Subtitle بە سەرکەوتوویی وەرگیرا ✅",
-          transcript: transcript.transcript
+          title: data.title,
+          language: data.language,
+          transcript: data.transcript
         }),
         {
           headers: {
@@ -68,10 +64,11 @@ export default {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "نەتوانرا Subtitle وەربگیرێت",
+          error: "کێشەیەک لە وەرگرتنی Transcript ڕوویدا",
           details: String(error)
         }),
         {
+          status: 500,
           headers: {
             "Content-Type": "application/json; charset=utf-8"
           }
