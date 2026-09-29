@@ -1,0 +1,3 @@
+name = "kurdishsub-ai"
+main = "worker.js"
+compatibility_date = "2026-09-29"
