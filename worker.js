@@ -1,4 +1,4 @@
-import { Innertube } from "youtubei.js";
+import { Innertube } from "youtubei.js/cf-worker";
 
 export default {
   async fetch(request) {
@@ -48,15 +48,14 @@ export default {
       const youtube = await Innertube.create();
 
       const info = await youtube.getInfo(videoId);
-
-      const transcriptData = await info.getTranscript();
+      const transcript = await info.getTranscript();
 
       return new Response(
         JSON.stringify({
           success: true,
-          videoId: videoId,
-          message: "Transcript بە سەرکەوتوویی وەرگیرا ✅",
-          data: transcriptData
+          videoId,
+          message: "Subtitle بە سەرکەوتوویی وەرگیرا ✅",
+          transcript: transcript.transcript
         }),
         {
           headers: {
