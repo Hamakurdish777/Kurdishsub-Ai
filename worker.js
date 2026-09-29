@@ -105,7 +105,7 @@ export default {
       });
 
     } catch (error) {
-      return jsonResponse({
+      details: String(error)return jsonResponse({
         success: false,
         error: "کێشەیەک ڕوویدا",
         details: String(error)
