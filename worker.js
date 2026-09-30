@@ -48,7 +48,19 @@ export default {
         encodeURIComponent(videoUrl)
       );
 
-      const transcriptData = await transcriptResponse.json();
+      const transcriptText = await transcriptResponse.text();
+
+let transcriptData;
+
+try {
+  transcriptData = JSON.parse(transcriptText);
+} catch {
+  return jsonResponse({
+    success: false,
+    error: "FreeTranscriptAPI وەڵامێکی دروست نەدا",
+    details: transcriptText.slice(0, 500)
+  }, 502);
+}
 
       if (!transcriptResponse.ok) {
         return jsonResponse({
