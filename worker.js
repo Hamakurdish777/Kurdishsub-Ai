@@ -87,9 +87,31 @@ try {
       }
 
       // 3. وەرگێڕان بۆ کوردی سۆرانی
-      const translationResponse = await fetch(
-        "https://api.zimanox.com/v1/translate",
-        {
+      const videoId = new URL(videoUrl).searchParams.get("v") || videoUrl.split("/").pop().split("?")[0];
+
+const transcriptResponse = await fetch(
+  "https://youtube-transcript.ai/transcript/" + encodeURIComponent(videoId) + ".txt"
+);
+
+const transcriptText = await transcriptResponse.text();
+
+if (!transcriptResponse.ok) {
+  return jsonResponse({
+    success: false,
+    error: "نەتوانرا Transcript وەربگیرێت",
+    details: transcriptText.slice(0, 500)
+  }, transcriptResponse.status);
+}
+
+const transcriptData = {
+  title: "",
+  transcript: transcriptText
+    .split("\n")
+    .filter(line => line.trim())
+    .map(line => ({
+      text: line.replace(/^\[\d+:\d+\]\s*/, "").trim()
+    }))
+};
           method: "POST",
           headers: {
             "Authorization": "Bearer " + env.ZIMANOX_API_KEY,
