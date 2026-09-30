@@ -40,49 +40,44 @@ export default {
       }, 400);
     }
 
-    let videoId = videoUrl.trim();
-
-    if (videoId.includes("youtube.com") || videoId.includes("youtu.be")) {
-      try {
-        const parsed = new URL(videoId);
-
-        if (parsed.searchParams.get("v")) {
-          videoId = parsed.searchParams.get("v");
-        } else {
-          videoId = parsed.pathname
-            .split("/")
-            .filter(Boolean)
-            .pop();
+    try {
+      const response = await fetch(
+        "https://api.freetranscriptapi.com/v1/transcript?video_url=" +
+        encodeURIComponent(videoUrl),
+        {
+          headers: {
+            "Authorization": "Bearer " + env.FREETRANSCRIPT_API_KEY
+          }
         }
+      );
+
+      const text = await response.text();
+
+      let data;
+
+      try {
+        data = JSON.parse(text);
       } catch (e) {
         return jsonResponse({
           success: false,
-          error: "لینکی YouTube دروست نییە"
-        }, 400);
+          error: "API وەڵامی JSON ـی دروستی نەدا",
+          details: text.slice(0, 500)
+        }, 502);
       }
-    }
-
-    try {
-      const transcriptUrl =
-        "https://youtube-transcript.ai/transcript/" +
-        encodeURIComponent(videoId) +
-        ".txt";
-
-      const response = await fetch(transcriptUrl);
-      const text = await response.text();
 
       if (!response.ok) {
         return jsonResponse({
           success: false,
-          error: "Transcript بەردەست نییە",
-          details: text.slice(0, 500)
+          error: "نەتوانرا Transcript وەربگیرێت",
+          details: data
         }, response.status);
       }
 
       return jsonResponse({
         success: true,
-        videoId: videoId,
-        transcript: text
+        title: data.title,
+        language: data.language,
+        transcript: data.transcript
       });
 
     } catch (error) {
