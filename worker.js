@@ -59,8 +59,13 @@ async function translateChunk(text) {
   }
 
   if (!response.ok) {
-    throw new Error("MyMemory API error");
-  }
+  throw new Error(
+    "MyMemory API error (" +
+    response.status +
+    "): " +
+    raw.slice(0, 500)
+  );
+}
 
   if (!data.responseData || !data.responseData.translatedText) {
     throw new Error("وەرگێڕان بەردەست نییە");
