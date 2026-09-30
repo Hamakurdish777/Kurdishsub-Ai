@@ -68,7 +68,10 @@ async function translateChunk(text) {
 }
 
   if (!data.responseData || !data.responseData.translatedText) {
-    throw new Error("وەرگێڕان بەردەست نییە");
+    throw new Error(
+  "MyMemory وەرگێڕان نەگەڕاندەوە: " +
+  raw.slice(0, 500)
+);
   }
 
   return data.responseData.translatedText;
