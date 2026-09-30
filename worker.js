@@ -45,12 +45,6 @@ export default {
   "https://api.freetranscriptapi.com/v1/transcript?video_url=" +
   encodeURIComponent(videoUrl)
 );
-          headers: {
-            "Authorization": "Bearer " + env.FREETRANSCRIPT_API_KEY
-          }
-        }
-      );
-
       const text = await response.text();
 
       let data;
