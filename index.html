@@ -117,10 +117,7 @@
         }
         status.textContent = "✅ ژێرنووس بە سەرکەوتوویی وەرگیرا";
         title.textContent = "🎬 " + data.title;
-        const text = data.transcript
-          .map(item => item.text)
-          .join("\n");
-        transcriptBox.textContent = text;
+        transcriptBox.textContent = data.translation;;
       } catch (error) {
         status.textContent =
           "❌ نەتوانرا پەیوەندی بە سێرڤەرەکەوە بکرێت.";
