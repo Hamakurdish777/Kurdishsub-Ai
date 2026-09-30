@@ -42,9 +42,9 @@ export default {
 
     try {
       const response = await fetch(
-        "https://api.freetranscriptapi.com/v1/transcript?video_url=" +
-        encodeURIComponent(videoUrl),
-        {
+  "https://api.freetranscriptapi.com/v1/transcript?video_url=" +
+  encodeURIComponent(videoUrl)
+);
           headers: {
             "Authorization": "Bearer " + env.FREETRANSCRIPT_API_KEY
           }
