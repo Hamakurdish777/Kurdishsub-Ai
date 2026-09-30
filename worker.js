@@ -14,6 +14,61 @@ function jsonResponse(data, status = 200) {
   });
 }
 
+function byteLength(text) {
+  return new TextEncoder().encode(text).length;
+}
+
+function makeChunks(items, maxBytes = 430) {
+  const chunks = [];
+  let current = "";
+
+  for (const item of items) {
+    const text = item.text.trim();
+    if (!text) continue;
+
+    const candidate = current ? current + " " + text : text;
+
+    if (byteLength(candidate) > maxBytes && current) {
+      chunks.push(current);
+      current = text;
+    } else {
+      current = candidate;
+    }
+  }
+
+  if (current) chunks.push(current);
+
+  return chunks;
+}
+
+async function translateChunk(text) {
+  const url =
+    "https://api.mymemory.translated.net/get?q=" +
+    encodeURIComponent(text) +
+    "&langpair=en|ckb-IQ";
+
+  const response = await fetch(url);
+  const raw = await response.text();
+
+  let data;
+
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    throw new Error("MyMemory وەڵامی JSON ـی دروستی نەدا");
+  }
+
+  if (!response.ok) {
+    throw new Error("MyMemory API error");
+  }
+
+  if (!data.responseData || !data.responseData.translatedText) {
+    throw new Error("وەرگێڕان بەردەست نییە");
+  }
+
+  return data.responseData.translatedText;
+}
+
 export default {
   async fetch(request, env) {
     const requestUrl = new URL(request.url);
@@ -26,9 +81,10 @@ export default {
     }
 
     if (requestUrl.pathname !== "/api") {
-      return new Response("KurdSub AI Backend is running 🚀", {
-        headers: corsHeaders
-      });
+      return new Response(
+        "KurdSub AI Backend is running 🚀",
+        { headers: corsHeaders }
+      );
     }
 
     const videoUrl = requestUrl.searchParams.get("url");
@@ -47,17 +103,17 @@ export default {
         encodeURIComponent(videoUrl)
       );
 
-      const transcriptText = await transcriptResponse.text();
+      const transcriptRaw = await transcriptResponse.text();
 
       let transcriptData;
 
       try {
-        transcriptData = JSON.parse(transcriptText);
-      } catch (e) {
+        transcriptData = JSON.parse(transcriptRaw);
+      } catch {
         return jsonResponse({
           success: false,
           error: "FreeTranscriptAPI وەڵامی دروستی نەدا",
-          details: transcriptText.slice(0, 500)
+          details: transcriptRaw.slice(0, 300)
         }, 502);
       }
 
@@ -69,70 +125,30 @@ export default {
         }, transcriptResponse.status);
       }
 
-      if (!transcriptData.transcript || !transcriptData.transcript.length) {
+      if (!transcriptData.transcript?.length) {
         return jsonResponse({
           success: false,
           error: "هیچ Transcript ـێک بۆ ئەم ڤیدیۆیە نییە"
         }, 404);
       }
 
-      // 2. کۆکردنەوەی دەق
-      const text = transcriptData.transcript
-        .map(item => item.text)
-        .join(" ");
-
-      if (!text.trim()) {
-        return jsonResponse({
-          success: false,
-          error: "Transcript بەتاڵە"
-        }, 400);
-      }
+      // 2. دابەشکردنی دەق بۆ پارچەی بچووک
+      const chunks = makeChunks(transcriptData.transcript);
 
       // 3. وەرگێڕان بۆ کوردی سۆرانی
-      const translationResponse = await fetch(
-        "https://api.zimanox.com/v1/translate",
-        {
-          method: "POST",
-          headers: {
-            "Authorization": "Bearer " + env.ZIMANOX_API_KEY,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            text: text,
-            source: "en",
-            target: "ckb"
-          })
-        }
-      );
+      const translations = [];
 
-      const translationText = await translationResponse.text();
-
-      let translationData;
-
-      try {
-        translationData = JSON.parse(translationText);
-      } catch (e) {
-        return jsonResponse({
-          success: false,
-          error: "Zimanox وەڵامی دروستی نەدا",
-          details: translationText.slice(0, 500)
-        }, 502);
+      for (const chunk of chunks) {
+        const translated = await translateChunk(chunk);
+        translations.push(translated);
       }
 
-      if (!translationResponse.ok) {
-        return jsonResponse({
-          success: false,
-          error: "وەرگێڕان سەرکەوتوو نەبوو",
-          details: translationData
-        }, translationResponse.status);
-      }
-
-      // 4. ناردنی ئەنجام
+      // 4. ئەنجام
       return jsonResponse({
         success: true,
         title: transcriptData.title,
         language: transcriptData.language,
-        translation: translationData.translation
+        translation: translations.join("\n\n")
       });
 
     } catch (error) {
