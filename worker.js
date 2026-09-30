@@ -43,7 +43,11 @@ export default {
 
     try {
       // 1. وەرگرتنی Transcript
-      const transcriptResponse = await fetch(
+      const transcriptResponse = await fetch(const dnsTest = await fetch("https://api.freetranscriptapi.com/");
+return new Response(await dnsTest.text(), {
+  status: dnsTest.status,
+  headers: corsHeaders
+});
         "https://api.freetranscriptapi.com/v1/transcript?video_url=" +
         encodeURIComponent(videoUrl)
       );
