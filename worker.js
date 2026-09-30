@@ -41,10 +41,16 @@ export default {
     }
 
     try {
-      const videoId =
-        new URL(videoUrl).searchParams.get("v") ||
-        videoUrl.split("/").pop().split("?")[0];
+      let videoId = videoUrl;
 
+try {
+  const parsed = new URL(videoUrl);
+  videoId =
+    parsed.searchParams.get("v") ||
+    parsed.pathname.split("/").filter(Boolean).pop();
+} catch (e) {
+  videoId = videoUrl.split("?")[0].trim();
+}
       const transcriptResponse = await fetch(
         "https://youtube-transcript.ai/transcript/" +
         encodeURIComponent(videoId) +
