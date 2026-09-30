@@ -16,7 +16,7 @@ function jsonResponse(data, status = 200) {
 
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
+    const requestUrl = new URL(request.url);
 
     if (request.method === "OPTIONS") {
       return new Response(null, {
@@ -25,13 +25,13 @@ export default {
       });
     }
 
-    if (url.pathname !== "/api") {
+    if (requestUrl.pathname !== "/api") {
       return new Response("KurdSub AI Backend is running 🚀", {
         headers: corsHeaders
       });
     }
 
-    const videoUrl = url.searchParams.get("url");
+    const videoUrl = requestUrl.searchParams.get("url");
 
     if (!videoUrl) {
       return jsonResponse({
@@ -40,37 +40,49 @@ export default {
       }, 400);
     }
 
-    try {
-      let videoId = videoUrl;
+    let videoId = videoUrl.trim();
 
-try {
-  const parsed = new URL(videoUrl);
-  videoId =
-    parsed.searchParams.get("v") ||
-    parsed.pathname.split("/").filter(Boolean).pop();
-} catch (e) {
-  videoId = videoUrl.split("?")[0].trim();
-}
-      const transcriptResponse = await fetch(
-        "https://youtube-transcript.ai/transcript/" +
-        encodeURIComponent(videoId) +
-        ".txt"
-      );
+    if (videoId.includes("youtube.com") || videoId.includes("youtu.be")) {
+      try {
+        const parsed = new URL(videoId);
 
-      const transcriptText = await transcriptResponse.text();
-
-      if (!transcriptResponse.ok) {
+        if (parsed.searchParams.get("v")) {
+          videoId = parsed.searchParams.get("v");
+        } else {
+          videoId = parsed.pathname
+            .split("/")
+            .filter(Boolean)
+            .pop();
+        }
+      } catch (e) {
         return jsonResponse({
           success: false,
-          error: "نەتوانرا Transcript وەربگیرێت",
-          details: transcriptText.slice(0, 500)
-        }, transcriptResponse.status);
+          error: "لینکی YouTube دروست نییە"
+        }, 400);
+      }
+    }
+
+    try {
+      const transcriptUrl =
+        "https://youtube-transcript.ai/transcript/" +
+        encodeURIComponent(videoId) +
+        ".txt";
+
+      const response = await fetch(transcriptUrl);
+      const text = await response.text();
+
+      if (!response.ok) {
+        return jsonResponse({
+          success: false,
+          error: "Transcript بەردەست نییە",
+          details: text.slice(0, 500)
+        }, response.status);
       }
 
       return jsonResponse({
         success: true,
         videoId: videoId,
-        transcript: transcriptText
+        transcript: text
       });
 
     } catch (error) {
